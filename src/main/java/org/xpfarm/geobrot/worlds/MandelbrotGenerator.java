@@ -23,7 +23,10 @@ import java.util.Random;
  * - The iteration count determines terrain height
  */
 public class MandelbrotGenerator extends ChunkGenerator {
-    
+
+    /** Fixed world-space window (blocks) the fractal is framed across; the set is centered on the world origin. */
+    private static final int FRACTAL_WORLD_SIZE = 512;
+
     private final double centerX;
     private final double centerY;
     private final double zoom;
@@ -67,11 +70,8 @@ public class MandelbrotGenerator extends ChunkGenerator {
                 int worldZ = chunkZ * 16 + z;
                 
                 // Calculate fractal coordinates for this location
-                // Convert world coordinates to fractal coordinates
-                double fractalX = centerX + (worldX / (zoom * 100.0));
-                double fractalZ = centerY + (worldZ / (zoom * 100.0));
-                
-                int escapeTime = FractalMath.mandelbrotEscapeTime(fractalX, fractalZ);
+                double[] fractal = fractalCoordsFor(worldX, worldZ);
+                int escapeTime = FractalMath.mandelbrotEscapeTime(fractal[0], fractal[1]);
                 
                 // Convert escape time to height
                 int height = calculateHeight(escapeTime);
@@ -82,6 +82,20 @@ public class MandelbrotGenerator extends ChunkGenerator {
         }
     }
     
+    /**
+     * Map a world (x,z) column to its Mandelbrot-plane coordinates, with the set centered on the
+     * world origin and framed/zoomed across FRACTAL_WORLD_SIZE. Adopts FractalMath.worldToFractal;
+     * the +FRACTAL_WORLD_SIZE/2 offset re-centers worldToFractal's viewport (which is centered at
+     * worldSize/2) onto world (0,0), so world origin == fractal center (centerX, centerY).
+     * @return { fractalX, fractalZ }
+     */
+    double[] fractalCoordsFor(int worldX, int worldZ) {
+        return FractalMath.worldToFractal(
+            worldX + FRACTAL_WORLD_SIZE / 2,
+            worldZ + FRACTAL_WORLD_SIZE / 2,
+            centerX, centerY, zoom, FRACTAL_WORLD_SIZE);
+    }
+
     /**
      * Calculate terrain height based on Mandelbrot escape time
      */
