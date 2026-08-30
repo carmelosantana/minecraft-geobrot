@@ -1,0 +1,116 @@
+# GeoBrot Plugin Configuration
+# Configure fractal world generation and plugin behavior
+
+# World Generation Settings
+generation:
+  # Default world size (in blocks)
+  default-world-size: 512
+  
+  # Base height for floating islands
+  base-height: 64
+  
+  # Maximum thickness of fractal islands
+  max-thickness: 16
+  
+  # Default zoom level for new worlds
+  default-zoom: 1.0
+  
+  # Minimum escape time to generate terrain
+  min-escape-time: 10
+
+# Material Palettes
+# Define what materials are used for different fractal depths
+materials:
+  # Very deep areas (escape time > 70)
+  deep:
+    core: CALCITE
+    middle: AMETHYST_BLOCK
+    surface: BUDDING_AMETHYST
+  
+  # Medium-deep areas (escape time 50-70)
+  medium-deep:
+    core: PRISMARINE
+    middle: PRISMARINE_BRICKS
+    surface: DARK_PRISMARINE
+  
+  # Medium areas (escape time 30-50)
+  medium:
+    core: COPPER_BLOCK
+    surface: OXIDIZED_COPPER
+  
+  # Shallow areas (escape time < 30)
+  shallow:
+    core: STONE
+    surface: COBBLESTONE
+
+# Performance Settings
+performance:
+  # Enable asynchronous world generation
+  async-generation: true
+  
+  # Maximum concurrent world operations
+  max-concurrent-operations: 2
+  
+  # Chunk generation timeout (seconds)
+  generation-timeout: 30
+
+# Default Fractal Parameters
+# These are used when no seed is provided
+defaults:
+  # Interesting locations in the Mandelbrot set
+  presets:
+    classic:
+      center-x: -0.7
+      center-y: 0.0
+      zoom: 1.0
+    
+    spiral:
+      center-x: -0.16
+      center-y: 1.038
+      zoom: 0.8
+    
+    seahorse:
+      center-x: -0.74529
+      center-y: 0.11307
+      zoom: 1.5
+    
+    elephant:
+      center-x: 0.25
+      center-y: 0.0
+      zoom: 1.2
+
+# World Management
+worlds:
+  # Auto-load fractal worlds on server start
+  auto-load: true
+  
+  # Maximum number of fractal worlds
+  max-worlds: 10
+  
+  # World backup settings
+  backup:
+    enabled: true
+    interval: 1440 # minutes (24 hours)
+    max-backups: 3
+
+# Permissions
+permissions:
+  # Allow players to create worlds by default
+  allow-creation: false
+  
+  # Allow players to teleport to fractal worlds
+  allow-teleport: true
+  
+  # Allow players to list worlds
+  allow-list: true
+
+# Debug Settings
+debug:
+  # Enable debug logging
+  enabled: false
+  
+  # Log fractal calculations
+  log-calculations: false
+  
+  # Log world generation timing
+  log-timing: false

@@ -1,0 +1,34 @@
+main: org.xpfarm.geobrot.GeoBrotPlugin
+name: GeoBrot
+version: 0.1.1
+description: Generate and explore floating island worlds shaped like the Mandelbrot or Buddhabrot fractals
+author: Carmelo Santana
+website: https://hv2.world
+api-version: 1.21
+
+commands:
+  mandel:
+    description: Mandelbrot fractal world commands
+    usage: /mandel help
+    permission: geobrot.use
+    aliases: [mandelbrot, fractal]
+
+permissions:
+  geobrot.use:
+    description: Basic usage of GeoBrot plugin
+    default: true
+  geobrot.admin:
+    description: Administrative commands for GeoBrot
+    default: op
+  geobrot.create:
+    description: Create new fractal worlds
+    default: op
+  geobrot.teleport:
+    description: Teleport to fractal worlds
+    default: true
+  geobrot.list:
+    description: List available fractal worlds
+    default: true
+  geobrot.regenerate:
+    description: Regenerate fractal worlds
+    default: op
