@@ -67,7 +67,7 @@ public class MandelCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(Component.text("=== GeoBrot Fractal World Commands ===", NamedTextColor.GOLD));
         sender.sendMessage(Component.text("/mandel help", NamedTextColor.YELLOW)
             .append(Component.text(" - Show this help message", NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/mandel create <name> [seed]", NamedTextColor.YELLOW)
+        sender.sendMessage(Component.text("/mandel create <name> [preset|seed]", NamedTextColor.YELLOW)
             .append(Component.text(" - Create a new fractal world", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/mandel tp <name>", NamedTextColor.YELLOW)
             .append(Component.text(" - Teleport to a fractal world", NamedTextColor.GRAY)));
@@ -91,7 +91,7 @@ public class MandelCommand implements CommandExecutor, TabCompleter {
         }
         
         if (args.length < 2) {
-            sender.sendMessage(Component.text("Usage: /mandel create <name> [seed]", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Usage: /mandel create <name> [preset|seed]", NamedTextColor.RED));
             return true;
         }
         
@@ -345,13 +345,23 @@ public class MandelCommand implements CommandExecutor, TabCompleter {
                 .collect(Collectors.toList());
         } else if (args.length == 2) {
             String subCommand = args[0].toLowerCase();
-            
-            if ("tp".equals(subCommand) || "teleport".equals(subCommand) || 
-                "regen".equals(subCommand) || "regenerate".equals(subCommand) || 
+
+            if ("tp".equals(subCommand) || "teleport".equals(subCommand) ||
+                "regen".equals(subCommand) || "regenerate".equals(subCommand) ||
                 "info".equals(subCommand)) {
                 // Second argument - world names
                 return worldManager.getFractalWorldNames().stream()
                     .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .collect(Collectors.toList());
+            }
+        } else if (args.length == 3) {
+            String subCommand = args[0].toLowerCase();
+
+            if ("create".equals(subCommand)) {
+                // Second argument to create (/mandel create <name> [preset|seed]) - offer
+                // known preset names; an unmatched free-form seed still works via typing.
+                return worldManager.getPresetNames().stream()
+                    .filter(preset -> preset.toLowerCase().startsWith(args[2].toLowerCase()))
                     .collect(Collectors.toList());
             }
         }

@@ -5,6 +5,7 @@ import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.xpfarm.geobrot.GeoBrotPlugin;
@@ -50,8 +51,55 @@ public class FractalWorldManager {
     }
     
     /**
+     * Resolve a {@code /mandel create} argument to fractal parameters.
+     *
+     * <p>The argument is matched case-insensitively against the preset names under
+     * {@code defaults.presets} in {@code config}; a match reads that preset's
+     * {@code center-x}, {@code center-y}, and {@code zoom}. A {@code null} argument or an
+     * argument that doesn't name a known preset falls back to
+     * {@link FractalMath#seedToFractalParams(String)} (the seed-hashing behavior), so an
+     * arbitrary seed string still works exactly as before.
+     *
+     * @param arg the create-command argument: {@code null}, a preset name, or a seed
+     * @param config the plugin configuration holding {@code defaults.presets}
+     * @return array with {@code [centerX, centerY, zoom]}
+     */
+    static double[] resolveFractalParams(String arg, FileConfiguration config) {
+        if (arg == null) {
+            return FractalMath.seedToFractalParams(null);
+        }
+
+        ConfigurationSection presets = config.getConfigurationSection("defaults.presets");
+        if (presets != null) {
+            for (String presetName : presets.getKeys(false)) {
+                if (presetName.equalsIgnoreCase(arg)) {
+                    double centerX = presets.getDouble(presetName + ".center-x");
+                    double centerY = presets.getDouble(presetName + ".center-y");
+                    double zoom = presets.getDouble(presetName + ".zoom");
+                    return new double[]{centerX, centerY, zoom};
+                }
+            }
+        }
+
+        return FractalMath.seedToFractalParams(arg);
+    }
+
+    /**
+     * Get the preset names available under {@code defaults.presets}, for tab-completion.
+     *
+     * @return set of configured preset names, or an empty set if none are configured
+     */
+    public Set<String> getPresetNames() {
+        ConfigurationSection presets = plugin.getConfig().getConfigurationSection("defaults.presets");
+        if (presets == null) {
+            return Set.of();
+        }
+        return presets.getKeys(false);
+    }
+
+    /**
      * Create a new fractal world
-     * 
+     *
      * @param name World name
      * @param seed Seed string (optional)
      * @return Created world or null if failed
@@ -60,9 +108,9 @@ public class FractalWorldManager {
         if (fractalWorlds.containsKey(name)) {
             return null; // World already exists
         }
-        
-        // Generate fractal parameters from seed
-        double[] params = FractalMath.seedToFractalParams(seed);
+
+        // Resolve fractal parameters: a known preset name, or fall back to seed hashing
+        double[] params = resolveFractalParams(seed, plugin.getConfig());
         double centerX = params[0];
         double centerY = params[1];
         double zoom = params[2];
