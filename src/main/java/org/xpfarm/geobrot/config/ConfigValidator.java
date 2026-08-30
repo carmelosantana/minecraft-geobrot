@@ -21,41 +21,54 @@ public class ConfigValidator {
         this.logger = plugin.getLogger();
         this.config = plugin.getConfig();
     }
-    
+
+    /**
+     * Test seam: validate an arbitrary {@link FileConfiguration} without requiring a running
+     * server. There is no backing {@link JavaPlugin}, so {@link JavaPlugin#saveConfig()} is
+     * never invoked - the caller owns persisting the (in-memory) configuration it passed in.
+     */
+    ConfigValidator(FileConfiguration config, Logger logger) {
+        this.plugin = null;
+        this.logger = logger;
+        this.config = config;
+    }
+
     /**
      * Validate and fix the configuration
-     * 
+     *
      * @return true if configuration is valid or was successfully fixed
      */
     public boolean validateConfig() {
         boolean isValid = true;
-        
+
         // Validate generation settings
         if (!validateGenerationSettings()) {
             isValid = false;
         }
-        
+
         // Validate material settings
         if (!validateMaterialSettings()) {
             isValid = false;
         }
-        
+
         // Validate performance settings
         if (!validatePerformanceSettings()) {
             isValid = false;
         }
-        
+
         // Validate permissions settings
         if (!validatePermissionSettings()) {
             isValid = false;
         }
-        
+
         // Save configuration if changes were made
         if (!isValid) {
-            plugin.saveConfig();
+            if (plugin != null) {
+                plugin.saveConfig();
+            }
             logger.info("Configuration has been validated and updated");
         }
-        
+
         return true; // Always return true as we fix issues
     }
     
@@ -95,41 +108,79 @@ public class ConfigValidator {
             config.set("generation.sea_level", 60);
             isValid = false;
         }
-        
+
+        // Validate terrain floor Y (see TerrainProfile.fromConfig for the matching defaults)
+        int floorY = config.getInt("generation.floor-y", 135);
+        if (floorY < -64 || floorY > 300) {
+            logger.warning("Invalid floor-y: " + floorY + ". Setting to default 135");
+            config.set("generation.floor-y", 135);
+            isValid = false;
+        }
+
+        // Validate terrain surface base Y
+        int surfaceBaseY = config.getInt("generation.surface-base-y", 153);
+        if (surfaceBaseY < -64 || surfaceBaseY > 300) {
+            logger.warning("Invalid surface-base-y: " + surfaceBaseY + ". Setting to default 153");
+            config.set("generation.surface-base-y", 153);
+            isValid = false;
+        }
+
+        // Validate terrain relief amplitude
+        int reliefAmplitude = config.getInt("generation.relief-amplitude", 12);
+        if (reliefAmplitude < 0 || reliefAmplitude > 64) {
+            logger.warning("Invalid relief-amplitude: " + reliefAmplitude + ". Setting to default 12");
+            config.set("generation.relief-amplitude", 12);
+            isValid = false;
+        }
+
         return isValid;
     }
-    
+
+    /** The four escape-time material tiers, matching {@code materials.*} in config.yml. */
+    private static final String[] MATERIAL_TIERS = {"deep", "medium-deep", "medium", "shallow"};
+
     private boolean validateMaterialSettings() {
         boolean isValid = true;
-        
-        // Check if material palette exists
-        if (!config.contains("materials.palette")) {
-            logger.warning("Material palette not found. Using default materials");
-            config.set("materials.palette.0", "STONE");
-            config.set("materials.palette.1", "COBBLESTONE");
-            config.set("materials.palette.2", "ANDESITE");
-            config.set("materials.palette.3", "GRANITE");
-            config.set("materials.palette.4", "DIORITE");
+
+        // Verify every escape-time tier is present; if the whole section is missing (or any
+        // tier within it is), seed the shipped config.yml defaults for all four tiers.
+        boolean missingTier = !config.contains("materials");
+        if (!missingTier) {
+            for (String tier : MATERIAL_TIERS) {
+                if (!config.contains("materials." + tier)) {
+                    missingTier = true;
+                    break;
+                }
+            }
+        }
+
+        if (missingTier) {
+            logger.warning("Material tiers not found. Using default materials");
+            seedDefaultMaterialTiers();
             isValid = false;
         }
-        
-        // Validate ocean material
-        String oceanMaterial = config.getString("materials.ocean", "WATER");
-        if (oceanMaterial == null || oceanMaterial.isEmpty()) {
-            logger.warning("Invalid ocean material. Setting to WATER");
-            config.set("materials.ocean", "WATER");
-            isValid = false;
-        }
-        
-        // Validate bedrock material
-        String bedrockMaterial = config.getString("materials.bedrock", "BEDROCK");
-        if (bedrockMaterial == null || bedrockMaterial.isEmpty()) {
-            logger.warning("Invalid bedrock material. Setting to BEDROCK");
-            config.set("materials.bedrock", "BEDROCK");
-            isValid = false;
-        }
-        
+
         return isValid;
+    }
+
+    /**
+     * Seed the four escape-time material tiers with the shipped config.yml defaults
+     * (deep/medium-deep/medium/shallow core-middle-surface, per GeodePalette's default table).
+     */
+    private void seedDefaultMaterialTiers() {
+        config.set("materials.deep.core", "CALCITE");
+        config.set("materials.deep.middle", "AMETHYST_BLOCK");
+        config.set("materials.deep.surface", "BUDDING_AMETHYST");
+
+        config.set("materials.medium-deep.core", "PRISMARINE");
+        config.set("materials.medium-deep.middle", "PRISMARINE_BRICKS");
+        config.set("materials.medium-deep.surface", "DARK_PRISMARINE");
+
+        config.set("materials.medium.core", "COPPER_BLOCK");
+        config.set("materials.medium.surface", "OXIDIZED_COPPER");
+
+        config.set("materials.shallow.core", "STONE");
+        config.set("materials.shallow.surface", "COBBLESTONE");
     }
     
     private boolean validatePerformanceSettings() {
@@ -162,7 +213,6 @@ public class ConfigValidator {
             logger.info("Permissions section not found. Creating default permissions");
             config.set("permissions.create_world", "geobrot.create");
             config.set("permissions.teleport", "geobrot.teleport");
-            config.set("permissions.admin", "geobrot.admin");
             isValid = false;
         }
         

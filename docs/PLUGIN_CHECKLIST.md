@@ -82,26 +82,27 @@ Single root command `/mandel` (aliases `mandelbrot`, `fractal`), gated by `geobr
 
 ### Permissions
 
-`geobrot.use` (true), `geobrot.admin` (op), `geobrot.create` (op), `geobrot.teleport` (true),
-`geobrot.list` (true), `geobrot.regenerate` (op) — as declared in `plugin.yml`. Note:
-`geobrot.admin` is declared but not currently checked in `MandelCommand`; reconcile during dev
-(either wire it or drop it, and assert the outcome in `PluginDescriptorTest`).
+`geobrot.use` (true), `geobrot.create` (op), `geobrot.teleport` (true), `geobrot.list` (true),
+`geobrot.regenerate` (op) — as declared in `plugin.yml`. `geobrot.admin` was dropped in
+Milestone 2 (unused; not checked by any `hasPermission`) and must not be reintroduced.
 
 ### Configuration
 
-`config.yml` keys: `generation.*` (default-world-size, base-height, max-thickness, default-zoom,
-min-escape-time), `materials.{deep,medium-deep,medium,shallow}` (per-tier core/middle/surface
-block palette), `performance.*` (async-generation, max-concurrent-operations, generation-timeout),
-`defaults.presets.{classic,spiral,seahorse,elephant}` (center-x/center-y/zoom), `worlds.*`
-(auto-load, max-worlds, backup.*), `permissions.*` (allow-creation/teleport/list),
-`debug.*` (enabled, log-calculations, log-timing).
+`config.yml` keys: `generation.*` (default-world-size, floor-y, surface-base-y,
+relief-amplitude, default-zoom, min-escape-time), `materials.{deep,medium-deep,medium,shallow}`
+(per-tier core/middle/surface block palette), `performance.*` (async-generation,
+max-concurrent-operations, generation-timeout), `defaults.presets.{classic,spiral,seahorse,elephant}`
+(center-x/center-y/zoom), `worlds.*` (auto-load, max-worlds, backup.*), `permissions.*`
+(allow-creation/teleport/list), `debug.*` (enabled, log-calculations, log-timing).
 
-The terrain-model revival adds config-driven **height** keys (solid floor Y, surface target Y,
-relief amplitude) per the locked model (`.scratch/geobrot-terrain/issues/05-terrain-model-spec.md`) —
-so heights come from config, not the hardcoded `(maxHeight-seaLevel)/2` formula. **Config
-defect to fix in dev:** `ConfigValidator` checks a nonexistent `materials.palette` key (source
-of the benign "Material palette not found" WARN); it must validate the real
-`materials.{deep,medium-deep,medium,shallow}` structure instead.
+The terrain model reads its config-driven **height** keys (`generation.floor-y` 135,
+`generation.surface-base-y` 153, `generation.relief-amplitude` 12) via
+`TerrainProfile.fromConfig`, per the locked model
+(`.scratch/geobrot-terrain/issues/05-terrain-model-spec.md`) — heights come from config, not the
+hardcoded `(maxHeight-seaLevel)/2` formula. **Fixed in Milestone 3:** `ConfigValidator` used to
+check a nonexistent `materials.palette` key (source of the benign "Material palette not found"
+WARN); it now validates the real `materials.{deep,medium-deep,medium,shallow}` structure and also
+validates the three `generation.*` height keys above.
 
 ### Persistence
 

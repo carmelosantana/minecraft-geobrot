@@ -27,16 +27,14 @@ import java.util.stream.Collectors;
  */
 public class MandelCommand implements CommandExecutor, TabCompleter {
     
-    private final GeoBrotPlugin plugin;
     private final FractalWorldManager worldManager;
-    
+
     /**
      * Create a new mandel command executor
-     * 
+     *
      * @param plugin Plugin instance
      */
     public MandelCommand(GeoBrotPlugin plugin) {
-        this.plugin = plugin;
         this.worldManager = plugin.getWorldManager();
     }
     
