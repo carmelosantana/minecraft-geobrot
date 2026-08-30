@@ -108,25 +108,23 @@ public class MandelCommand implements CommandExecutor, TabCompleter {
         
         sender.sendMessage(Component.text("Creating fractal world '" + worldName + "'...", NamedTextColor.YELLOW));
         
-        // Create world asynchronously to avoid blocking
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
-            World world = worldManager.createFractalWorld(worldName, seed);
-            
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
-                if (world != null) {
-                    sender.sendMessage(Component.text("Successfully created fractal world: ", NamedTextColor.GREEN)
-                        .append(Component.text(worldName, NamedTextColor.GOLD)));
-                    
-                    if (seed != null) {
-                        sender.sendMessage(Component.text("Seed: ", NamedTextColor.GRAY)
-                            .append(Component.text(seed, NamedTextColor.WHITE)));
-                    }
-                } else {
-                    sender.sendMessage(Component.text("Failed to create fractal world '" + worldName + "'!", NamedTextColor.RED));
-                }
-            });
-        });
-        
+        // World creation fires WorldInitEvent, which Paper only allows to be triggered
+        // synchronously, so this must run on the main (command) thread — never on an
+        // async scheduler task.
+        World world = worldManager.createFractalWorld(worldName, seed);
+
+        if (world != null) {
+            sender.sendMessage(Component.text("Successfully created fractal world: ", NamedTextColor.GREEN)
+                .append(Component.text(worldName, NamedTextColor.GOLD)));
+
+            if (seed != null) {
+                sender.sendMessage(Component.text("Seed: ", NamedTextColor.GRAY)
+                    .append(Component.text(seed, NamedTextColor.WHITE)));
+            }
+        } else {
+            sender.sendMessage(Component.text("Failed to create fractal world '" + worldName + "'!", NamedTextColor.RED));
+        }
+
         return true;
     }
     
@@ -288,20 +286,18 @@ public class MandelCommand implements CommandExecutor, TabCompleter {
         
         sender.sendMessage(Component.text("Regenerating fractal world '" + worldName + "'...", NamedTextColor.YELLOW));
         
-        // Regenerate world asynchronously
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
-            boolean success = worldManager.regenerateFractalWorld(worldName);
-            
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
-                if (success) {
-                    sender.sendMessage(Component.text("Successfully regenerated fractal world: ", NamedTextColor.GREEN)
-                        .append(Component.text(worldName, NamedTextColor.GOLD)));
-                } else {
-                    sender.sendMessage(Component.text("Failed to regenerate fractal world '" + worldName + "'!", NamedTextColor.RED));
-                }
-            });
-        });
-        
+        // World regeneration re-creates the world and fires WorldInitEvent, which Paper
+        // only allows to be triggered synchronously, so this must run on the main
+        // (command) thread — never on an async scheduler task.
+        boolean success = worldManager.regenerateFractalWorld(worldName);
+
+        if (success) {
+            sender.sendMessage(Component.text("Successfully regenerated fractal world: ", NamedTextColor.GREEN)
+                .append(Component.text(worldName, NamedTextColor.GOLD)));
+        } else {
+            sender.sendMessage(Component.text("Failed to regenerate fractal world '" + worldName + "'!", NamedTextColor.RED));
+        }
+
         return true;
     }
     
