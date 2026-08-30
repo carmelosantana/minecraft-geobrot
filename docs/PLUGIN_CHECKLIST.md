@@ -310,8 +310,14 @@ _Gates 8a (workflow install, scaffold) / 8b (verify main CI, release)._
       + checksums, `original-*` excluded. Not the pack-carrying variant (GeoBrot ships no resource
       pack). YAML parses clean. Local `mvn clean verify` green (**73/73 tests**, BUILD SUCCESS,
       `geobrot-0.2.0.jar` shaded) before push — CI runs the same command.
-- [ ] Successful main Actions run is recorded before tagging. — **Gate 8b (release):** pending the
-      first main-branch Actions run triggered by this push.
+- [x] Successful main Actions run is recorded before tagging. — **Gate 8b (release) COMPLETE.**
+      Push `48119eb..a3353fd` → `main` triggered "Build and release" run
+      [33342456024](https://github.com/carmelosantana/minecraft-geobrot/actions/runs/33342456024):
+      `status: completed`, `conclusion: success`, `headSha a3353fd` (the exact pushed commit),
+      42s. Only annotations were non-fatal Bukkit `GameRule` deprecation warnings
+      (`FractalWorldManager` 162–167) — no build failure. Verified green **after** the run resolved
+      (an in-flight run is not evidence, per release §3). No tag cut — gate 9 (release) and gate 10
+      (updater) remain intentionally withheld pending the play-test-gated step.
 - [x] Workflow permissions contain no broader access than the documented contract. — `permissions:
       contents: write` only (needed for tagged runs to create/update releases); no broader scope.
 
