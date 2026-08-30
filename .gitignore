@@ -1,2 +1,5 @@
 # Maven build output
 target/
+
+# Wayfinder planning tracker (local-only)
+.scratch/
