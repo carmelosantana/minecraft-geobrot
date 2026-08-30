@@ -126,7 +126,7 @@ public class MandelbrotGenerator extends ChunkGenerator {
         }
 
         int gTop = surfaceY - 4;
-        int bandHeight = gTop - (floorY + 2) + 1;
+        int bandHeight = gTop - (floorY + profile.bedrockThickness()) + 1;
         int depthFromTop = gTop - y;
         return palette.geodeMaterialAt(escapeTime, depthFromTop, bandHeight);
     }
