@@ -260,9 +260,25 @@ _Gate 6 (`minecraft-plugin-dev`) — COMPLETE (Milestone 2)._
 
 ## 7. Matrix
 
-_Gate 7a (single-plugin runtime verify, `minecraft-plugin-dev`) — COMPLETE (Milestone 2), on a
-disposable Legendary stack (Paper 26.1.2, protocol 775) via `scripts/test-stack.sh`. Gate 7b
-(full-roster matrix) remains **withheld / out-of-band** (§1)._
+_Gate 7a (single-plugin runtime verify, `minecraft-plugin-dev`) — COMPLETE (Milestone 2, and
+**re-run for Milestone 3**), on a disposable Legendary stack (Paper 26.1.2, protocol 775) via
+`scripts/test-stack.sh`. Gate 7b (full-roster matrix) remains **withheld / out-of-band** (§1)._
+
+**Milestone 3 gate-7a terrain evidence (re-run on `geobrot-0.2.0.jar`, world `m3test`, center −0.7 zoom 1.0):**
+Stack up self-verified all four plugins green together (`floodgate`, `GeoBrot`, `Geyser-Spigot`,
+`ViaVersion`); `/mandel create m3test` → "Successfully created" (no async crash); `/mandel list`
+→ Loaded; `/mandel info` → center −0.7/0.0 zoom 1.0. Live RCON block probes confirmed the locked
+vertical model in the running world: **in-set spawn column (0,0)** — air Y167/166, **grass Y165**
+(plateau), dirt Y164/162, **budding_amethyst Y161** (deep surface), amethyst_block Y150 (deep
+middle), **calcite Y137** (deep core), **bedrock Y136/135**, **air Y134** (no plinth); **fringe
+column (300,0)** — **grass Y154** (gentle relief, −11 vs plateau), cobblestone Y148 (shallow
+surface), stone Y140 (shallow core), bedrock Y136/135, air Y134. Solid floor + 2-air headroom
+above grass → top-down `findSpawnLocation` lands safely (real-player `/mandel tp` deferred to
+gate 12, headless stack). Startup logs clean: GeoBrot enabled, world created, **no**
+`WorldInitEvent`/`IllegalStateException`, and the **"Material palette not found" WARN is gone**
+(ConfigValidator fix confirmed live). Screenshots captured: top-down height map (recognizable
+centered Mandelbrot as gentle contour) + vertical cross-section (grass/dirt/geode-tiers/bedrock,
+void below Y135).
 
 - [ ] Fresh-volume Legendary stack test covers every updater-managed plugin. — **7b withheld:**
       GeoBrot is not updater-managed yet; out-of-band, not required for this reactivation.
@@ -380,3 +396,57 @@ _Gate 12 (`minecraft-plugin-handoff`). Not this milestone._
   **Still outstanding (not M2 scope):** no `.github/workflows/` CI workflow is installed yet (§8a,
   scaffold item) — release (gate 9) stays withheld until Milestone 3, so this blocks nothing now.
   Next step: **Milestone 3** (terrain tune) via the same skill pair.
+
+- **Milestone 3 (tuned terrain model) — COMPLETE (2026-08-30).** Executed via
+  `superpowers:subagent-driven-development` under `minecraft-plugin-dev` (four implementer tasks,
+  each task-reviewed spec+quality; one final whole-branch review on the most capable model —
+  verdict **Ready to merge: Yes**, no Critical/Important). Implements the locked spec
+  `.scratch/geobrot-terrain/issues/05-terrain-model-spec.md`. Commits `e300343..e816c03` on branch
+  `claude/mystifying-wing-6ad97f`:
+  - **Terrain value objects:** `TerrainProfile` (config-driven floor/surface/amplitude +
+    `surfaceYFor`) and `GeodePalette` (escape-time tiers + within-tier sub-layering), parsed from
+    `config.yml`, fully unit-tested.
+  - **Generator rewrite:** `MandelbrotGenerator` now builds columns on the locked model — solid
+    floor **Y135** (air below, no plinth), bedrock cap Y135–136, `surfaceY = 153 +
+    round(12·E/MAX)` (in-set **Y165**, fringe **Y153**), stack grass→dirt(3)→geode-tier fill
+    (deep amethyst/calcite → medium-deep prismarine → medium copper → shallow stone/cobble by
+    escape-time). Removed the old `(maxHeight−seaLevel)/2` formula and the `maxHeight→320` clamp;
+    `FractalWorldManager` injects config-built profile+palette at all creation sites; spawn
+    fallback = `maxSurfaceY()+2`.
+  - **Config correctness:** `ConfigValidator` now validates the real
+    `materials.{deep,medium-deep,medium,shallow}` tiers (the "Material palette not found" WARN is
+    gone), plus the new `generation.floor-y/surface-base-y/relief-amplitude` keys; `geobrot.admin`
+    and a dead `plugin` field removed.
+  - **Presets wired:** `/mandel create <name> [preset]` resolves `defaults.presets`
+    (classic/spiral/seahorse/elephant) to center/zoom, seed fallback intact, tab-complete added.
+  - **Gate 6 + 7a evidence:** `mvn clean verify` green (**73 tests**); shaded `geobrot-0.2.0.jar`
+    inspected (plugin.yml v0.2.0/api 26.1/5 perms; config.yml carries the height keys; no dep
+    leak). Gate 7a re-run on a live Legendary stack — see the Milestone 3 terrain evidence block
+    in §7 above (live block probes confirm the exact vertical model; screenshots captured).
+
+  **Exit note — behaviors gate 7a could NOT reach (carry to gate 12 / play-test):**
+  - **Rendered terrain as a client sees it.** 7a is headless; the shape/materials were proven by
+    live RCON block probes and by a model render (top-down height map + cross-section), **not** by
+    a human joining. A Java/Bedrock client walk-through is still needed to confirm it reads as
+    intended in-world.
+  - **`/mandel tp` with a real player.** The top-down spawn-finder was verified structurally (solid
+    grass top + 2-air headroom proven by probes) but not exercised by an actual player join.
+  - GeoBrot introduces **no** forms, inventory UI, or custom item behavior — no additional
+    Bedrock-form/inventory rendering obligation beyond the above.
+
+  **Deferred MINORS (from the reviews; none block the milestone):** (a) new M3 `.java` files carry
+  AGPL per-file headers while older repo files are headerless (pre-existing gate-3 gap — a
+  housekeeping backfill would make the repo consistent); (b) **PRE-EXISTING** latent bug —
+  `ConfigValidator.validateGenerationSettings` checks phantom underscore keys
+  (`world_size`/`max_iterations`/`zoom_range.*`/`sea_level`) absent from the hyphenated
+  `config.yml` (same class as the fixed `materials.palette`; a follow-up task chip was spawned);
+  (c) `ConfigValidator`'s `plugin != null` saveConfig guard is untested on the real single-arg
+  constructor path. The one flagged latent coupling (geode band `floorY+2` literal vs
+  `bedrockThickness()`) was fixed in commit `e816c03`.
+
+  **Still outstanding (not M3 scope):** no `.github/workflows/` CI workflow installed yet (§8a,
+  scaffold item); **gate 9 (release)** and **gate 10 (updater enrollment)** remain the next
+  lifecycle steps now that the terrain is proven. **WorldCRUD integration remains a separate,
+  later milestone** (recon 04 path settled; needs the AGPL relicense — already in place — and
+  proven terrain — now done — but is deliberately out of scope here). Next step per the owner's
+  decision: choose whether to keep the branch, open a PR, or proceed to release (gate 9).
