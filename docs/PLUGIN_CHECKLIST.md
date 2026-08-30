@@ -299,10 +299,21 @@ void below Y135).
 
 _Gates 8a (workflow install, scaffold) / 8b (verify main CI, release)._
 
-- [ ] Identical standard plugin Actions workflow is installed with the required triggers, Temurin 25 build, artifact, checksum, and release behavior. —
-      No `.github/workflows/` present yet; scaffold installs it.
-- [ ] Successful main Actions run is recorded before tagging.
-- [ ] Workflow permissions contain no broader access than the documented contract.
+- [x] Identical standard plugin Actions workflow is installed with the required triggers, Temurin 25 build, artifact, checksum, and release behavior. —
+      **Gate 8a (scaffold) COMPLETE.** `.github/workflows/build.yml` installed, copied **verbatim**
+      from the plain-plugin canonical (`farmers-market`/`tuesday-twister` are byte-identical and
+      repo-agnostic via `${{ github.event.repository.name }}`); matches `GITHUB_ACTIONS.md` exactly:
+      triggers push `main` + tags `v*` + `pull_request`→`main` + `workflow_dispatch`; `checkout@v7`;
+      `setup-java@v5` Temurin 25 + maven cache; `mvn --batch-mode --no-transfer-progress clean verify`;
+      `SHA256SUMS.txt` generated from **inside** `target/` with bare filenames, excluding `original-*`;
+      `upload-artifact@v7`; `v*`-tag `gh release view`/`create` + `--clobber` upload of releasable JARs
+      + checksums, `original-*` excluded. Not the pack-carrying variant (GeoBrot ships no resource
+      pack). YAML parses clean. Local `mvn clean verify` green (**73/73 tests**, BUILD SUCCESS,
+      `geobrot-0.2.0.jar` shaded) before push — CI runs the same command.
+- [ ] Successful main Actions run is recorded before tagging. — **Gate 8b (release):** pending the
+      first main-branch Actions run triggered by this push.
+- [x] Workflow permissions contain no broader access than the documented contract. — `permissions:
+      contents: write` only (needed for tagged runs to create/update releases); no broader scope.
 
 ## 9. Release
 
