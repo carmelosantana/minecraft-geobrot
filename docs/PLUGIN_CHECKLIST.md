@@ -173,82 +173,110 @@ contract therefore applies vacuously — nothing to bound or disable.)
 
 ## 2. Repository
 
-_Gate 2 (`minecraft-plugin-scaffold`). Not this milestone. Notes for that gate:_
+_Repository items verified during Milestone 2 (standards migration folded scaffold-overlapping
+metadata into this run)._
 
-- [ ] Repository is `carmelosantana/minecraft-<slug>` with an SSH `origin` and `main` branch. —
-      Repo is `carmelosantana/geobrot` (documented deviation, §1). SSH `origin` and `main`
-      exist (baseline commit `1a4b33a`); reactivation work is on branch
-      `claude/blissful-curie-fb3c31`.
-- [ ] Existing user-owned worktree changes were identified and preserved. — Worktree clean at
-      gate-1 start.
-- [ ] No `herobrinesystems` references remain in source, metadata, workflows, remotes, or
-      documentation. — To be verified at scaffold; note the stale `hv2.world` website (§1) as a
-      separate metadata fix.
+- [x] Repository is `carmelosantana/minecraft-<slug>` with an SSH `origin` and `main` branch. —
+      Repo is `carmelosantana/geobrot` (documented deviation, §1). SSH `origin`
+      (`git@github.com:carmelosantana/minecraft-geobrot.git`) and `main` exist; M2 work is on
+      branch `claude/interesting-sanderson-099090` (worktree), base commit `74097bc`.
+- [x] Existing user-owned worktree changes were identified and preserved. — Worktree clean at
+      M2 start; only geobrot-owned files touched.
+- [x] No `herobrinesystems` references remain in source, metadata, workflows, remotes, or
+      documentation. — Verified: `grep -rniE herobrinesystems` over shipped source/metadata/docs
+      returns nothing. The stale `hv2.world` website was fixed to `https://xpfarm.org` (§3).
 
 ## 3. Metadata
 
-_Gate 3 (`minecraft-plugin-scaffold`). Not this milestone. Carries the relicense (ADR 0002)
-and the `website` fix (§1)._
+_Relicense (ADR 0002) and the `website` fix completed during Milestone 2 (folded into the
+standards-migration run per the M2 task order)._
 
-- [ ] AGPL-3.0-or-later `LICENSE` and Maven license metadata are present and consistent. —
-      **Currently CC BY-NC 4.0 → relicense to AGPL-3.0-or-later per ADR 0002.** No `LICENSE`
-      file present yet.
-- [ ] `https://xpfarm.org` metadata and Carmelo Santana author metadata are present. — Author
-      present; **website is stale `https://hv2.world` → fix to `https://xpfarm.org`.**
-- [ ] `play.xpfarm.org` is recorded as the public Minecraft server hostname where server identity is documented.
-- [ ] New work uses the `org.xpfarm` Maven group, or an existing-coordinate compatibility decision is documented. —
-      Group already `org.xpfarm.geobrot`. ✓ (kept per standing decision 2).
-- [ ] Repository slug, artifact, releasable JAR, updater destination, and `plugin.yml` names are consistent. —
-      Chain recorded in §1; consistent apart from the documented repo-name deviation.
-- [ ] No secrets committed in source, defaults, tests, logs, history, or documentation.
+- [x] AGPL-3.0-or-later `LICENSE` and Maven license metadata are present and consistent. —
+      `LICENSE` (full AGPL-3.0 text) created; pom `<licenses>` block added; README badge +
+      License section rewritten to AGPL-3.0-or-later. No CC BY-NC wording remains anywhere in
+      shipped files (commit `a0ffcd2`).
+- [x] `https://xpfarm.org` metadata and Carmelo Santana author metadata are present. — Author
+      present; website fixed `https://hv2.world` → `https://xpfarm.org` in pom.xml, plugin.yml,
+      README (commit `a0ffcd2`); stale doc prose swept (commit `d5e71eb`).
+- [x] `play.xpfarm.org` is recorded as the public Minecraft server hostname where server
+      identity is documented. — README live-server links updated `play.hv2.world` → `play.xpfarm.org`.
+- [x] New work uses the `org.xpfarm` Maven group, or an existing-coordinate compatibility decision is documented. —
+      Group kept `org.xpfarm.geobrot` per standing decision 2 (documented existing-coordinate decision).
+- [x] Repository slug, artifact, releasable JAR, updater destination, and `plugin.yml` names are consistent. —
+      slug `geobrot` = artifactId `geobrot` → `geobrot-0.2.0.jar` → destination `geobrot.jar` →
+      name `GeoBrot`; consistent apart from the documented repo-name deviation (§1).
+- [x] No secrets committed in source, defaults, tests, logs, history, or documentation. — GeoBrot
+      has no external services/credentials; no secrets present.
 
 ## 4. Compatibility
 
-_Gate 4 (`minecraft-plugin-dev`, Milestone 3). Carries standing decision 2 (standards
-migration) — the `1.21` → `'26.1'` `api-version` change is a compatibility change (bytecode),
-not just metadata, so it needs gate 6 + gate 7a re-run._
+_Gate 4 (`minecraft-plugin-dev`) — COMPLETE (Milestone 2). Standing decision 2 (standards
+migration) executed: the `1.21` → `'26.1'` change is a compatibility (bytecode) change, so
+gate 6 + gate 7a were re-run below._
 
-- [ ] Java 25/Paper 26.1.2 build 74 compile succeeds and `plugin.yml` uses `api-version: '26.1'`. —
-      Currently `api-version: 1.21` (loads green via backward-compat; migrate here).
-- [ ] Hard dependencies, soft dependencies, optional APIs, and load ordering were reviewed and declared. —
-      None expected (§1).
-- [ ] Geyser/Floodgate/ViaVersion review covers Bedrock-safe input, UI, inventory, identity, and protocol behavior. —
-      `/mandel` is chat-command only, no forms/inventory UI; low cross-play surface. Confirm at dev.
+- [x] Java 25/Paper 26.1.2 build 74 compile succeeds and `plugin.yml` uses `api-version: '26.1'`. —
+      `pom.xml`: `maven.compiler.release=25`, paper-api `26.1.2.build.74-stable`; `plugin.yml`:
+      `api-version: '26.1'` (quoted String, guarded by `PluginDescriptorTest`). `mvn clean verify`
+      BUILD SUCCESS on Java 25 (commit `a0ffcd2`).
+- [x] Hard dependencies, soft dependencies, optional APIs, and load ordering were reviewed and declared. —
+      None: GeoBrot depends only on the Paper API (provided). No `depend`/`softdepend`/`loadbefore`
+      needed; `plugin.yml` declares none.
+- [x] Geyser/Floodgate/ViaVersion review covers Bedrock-safe input, UI, inventory, identity, and protocol behavior. —
+      `/mandel` is chat-command only (no forms, no inventory UI, no item interaction, no
+      client-specific packets); no Bedrock-unsafe surface. Verified at gate 7a: GeoBrot ran green
+      alongside Geyser-Spigot, floodgate, and ViaVersion together on Paper 26.1.2 (protocol 775).
 
 ## 5. External services
 
-_Gate 5 (`minecraft-plugin-dev`). Vacuous — GeoBrot has no external integrations (§1)._
+_Gate 5 (`minecraft-plugin-dev`) — COMPLETE (vacuous). GeoBrot makes no outbound calls (§1)._
 
-- [ ] External integrations are disabled by default or require explicit configuration and have bounded timeouts. —
-      N/A: no external integrations.
-- [ ] Ollama/Umami-style external endpoints are optional and failure-tolerant when applicable. — N/A.
-- [ ] Endpoint failure cannot fail server/plugin startup, and diagnostics redact secrets. — N/A.
+- [x] External integrations are disabled by default or require explicit configuration and have bounded timeouts. —
+      N/A: no external integrations (no Ollama/Umami/HTTP clients in the codebase).
+- [x] Ollama/Umami-style external endpoints are optional and failure-tolerant when applicable. — N/A.
+- [x] Endpoint failure cannot fail server/plugin startup, and diagnostics redact secrets. — N/A: no endpoints, no secrets.
 
 ## 6. Tests and build
 
-_Gate 6 (`minecraft-plugin-dev`, Milestone 3)._
+_Gate 6 (`minecraft-plugin-dev`) — COMPLETE (Milestone 2)._
 
-- [ ] Unit tests cover separable logic, configuration, serialization, permissions, and failure paths where applicable. —
-      Existing tests: `FractalMathTest`, `MandelbrotGeneratorTest`, `ConfigValidatorTest`,
-      `GeoBrotPluginTest`. Extend for the fixed model.
-- [ ] `PluginDescriptorTest` parses `plugin.yml`/`config.yml` and asserts name, main, `String`
+- [x] Unit tests cover separable logic, configuration, serialization, permissions, and failure paths where applicable. —
+      `MandelbrotGeneratorTest` rewritten with 4 real assertions pinning the centered
+      `worldToFractal` mapping (origin→center, symmetry, zoom-framing, in-set/out-of-set);
+      `FractalMathTest`, `ConfigValidatorTest`, `GeoBrotPluginTest` retained. 29 tests total.
+- [x] `PluginDescriptorTest` parses `plugin.yml`/`config.yml` and asserts name, main, `String`
       `api-version`, substituted version, every command and permission the code uses. —
-      Verify/create at dev; must assert the `geobrot.admin` reconciliation (§1).
-- [ ] `mvn --batch-mode --no-transfer-progress clean verify` succeeds.
-- [ ] The shaded releasable JAR and embedded `plugin.yml` were inspected; `original-*` JARs are excluded.
+      Created (commit `a0ffcd2`): asserts name `GeoBrot`, main class, `api-version` is a String
+      `'26.1'`, resolved `${project.version}`, the `mandel` command, and permissions
+      `geobrot.{use,create,teleport,list,regenerate}`. `geobrot.admin` reconciled by **dropping**
+      it (unused; not checked by any `hasPermission`) — not asserted.
+- [x] `mvn --batch-mode --no-transfer-progress clean verify` succeeds. — BUILD SUCCESS, 29/29
+      tests, Java 25 / Maven 3.9.16.
+- [x] The shaded releasable JAR and embedded `plugin.yml` were inspected; `original-*` JARs are excluded. —
+      `target/geobrot-0.2.0.jar` inspected: embedded `plugin.yml` shows version `0.2.0`,
+      `api-version '26.1'`, `website https://xpfarm.org`, `mandel` command, five permissions,
+      main class present; JAR contains only `org.xpfarm.geobrot.*` classes (no Paper/Bukkit/Kyori
+      API leak — nothing to shade, all deps provided/test scope).
 
 ## 7. Matrix
 
-_Gate 7a (single-plugin runtime verify, `minecraft-plugin-dev`, Milestone 3). Gate 7b withheld
-(§1)._
+_Gate 7a (single-plugin runtime verify, `minecraft-plugin-dev`) — COMPLETE (Milestone 2), on a
+disposable Legendary stack (Paper 26.1.2, protocol 775) via `scripts/test-stack.sh`. Gate 7b
+(full-roster matrix) remains **withheld / out-of-band** (§1)._
 
 - [ ] Fresh-volume Legendary stack test covers every updater-managed plugin. — **7b withheld:**
       GeoBrot is not updater-managed yet; out-of-band, not required for this reactivation.
 - [ ] Each updater-managed plugin's manifest state and fresh-volume behavior are recorded separately. — 7b, withheld.
-- [ ] Paper, Geyser, Floodgate, and ViaVersion start successfully together. — Verify at 7a
-      (GeoBrot green alongside the cross-play stack).
-- [ ] Affected commands, permissions, persistence, and configuration reload were exercised over RCON with no server-wide hot reload. — 7a.
-- [ ] Ollama and Umami unavailable-endpoint tests keep the server and plugins available when applicable. — N/A.
+- [x] Paper, Geyser, Floodgate, and ViaVersion start successfully together. — 7a: RCON `plugins`
+      showed `GeoBrot`, `Geyser-Spigot`, `floodgate`, `ViaVersion` all green together; Java port
+      served a real Minecraft handshake (Paper 26.1.2, protocol 775).
+- [x] Affected commands, permissions, persistence, and configuration reload were exercised over RCON with no server-wide hot reload. —
+      7a: `/mandel create m2test` → **"Successfully created"** with **no** `WorldInitEvent`/
+      `IllegalStateException` in logs (the root fix); a world folder with 4 populated region files
+      (~500–600KB, around the origin) was written to disk → real terrain generated. `/mandel list`
+      → "m2test - Loaded"; `/mandel info` read back params; `/mandel regen m2test` →
+      "Successfully regenerated" with no async crash. Persistence = standard Bukkit world folders
+      (confirmed on disk). No server-wide hot reload used.
+- [x] Ollama and Umami unavailable-endpoint tests keep the server and plugins available when applicable. — N/A: no external endpoints.
 
 ## 8. CI/CD
 
@@ -309,3 +337,45 @@ _Gate 12 (`minecraft-plugin-handoff`). Not this milestone._
   Milestone 2 (terrain break fix) and Milestone 3 (standards migration + tune) via
   `superpowers:subagent-driven-development` + `minecraft-plugin-dev`; metadata/relicense land at
   the scaffold gate (§3).
+
+- **Milestone 2 (standards migration + root-cause fix) — COMPLETE (2026-08-30).** Executed via
+  `superpowers:subagent-driven-development` under `minecraft-plugin-dev` (three implementer tasks,
+  each task-reviewed; one final whole-branch review on the most capable model). Note: the M2 task
+  order folded the standards migration **and** the AGPL relicense into this milestone (the gate-1
+  plan had tentatively split migration into M3); the M2 scope as delivered is authoritative.
+  Commits `74097bc..6e9e6f1` on branch `claude/interesting-sanderson-099090`:
+  - **Standards migration:** Java 25 (`maven.compiler.release=25`), paper-api `26.1.2.build.74-stable`,
+    `plugin.yml` `api-version: '26.1'` (quoted), version `0.2.0`, group kept `org.xpfarm.geobrot`
+    (standing decision 2). `PluginDescriptorTest` added.
+  - **Relicense:** CC BY-NC 4.0 → AGPL-3.0-or-later (`LICENSE`, pom `<licenses>`, README); website
+    `hv2.world` → `xpfarm.org`; stale Java-21/Paper-1.21.6 doc prose swept.
+  - **Root fix:** `createFractalWorld`/`regenerateFractalWorld` moved to the main (command) thread
+    — the `WorldInitEvent may only be triggered synchronously` crash is gone (runtime-confirmed).
+  - **Mapping fix:** adopted `FractalMath.worldToFractal` (centered on world origin) in
+    `MandelbrotGenerator.generateNoise`, replacing the naive `worldX/(zoom*100)` sliver mapping.
+  - **Biome:** `Biome.PLAINS` verified — compiles against 26.1.2 and the world generated at 7a;
+    left unchanged (registry form not needed).
+  - **Gate 6 + 7a evidence:** `mvn clean verify` green (29 tests); shaded JAR inspected; on a live
+    Legendary Paper 26.1.2 stack `/mandel create` produced a world with populated region files and
+    NO async crash, alongside a green Geyser/Floodgate/ViaVersion.
+
+  **Exit note — behaviors gate 7a could NOT reach (carry to gate 12 / play-test):**
+  - **The rendered terrain shape.** 7a is headless (no client joins), so the *visual* "recognizable,
+    centered Mandelbrot" was proven only at the code/arithmetic level (unit tests on the mapping) and
+    by the on-disk region files existing around the origin — **not** by a human seeing the fractal.
+    A real Java/Bedrock client walk-through is needed to confirm the shape reads as intended.
+  - **Spawn/teleport UX.** `/mandel tp` teleporting a real player onto safe ground was not exercised
+    (no player in a headless stack); the spawn-finder logic is unchanged from before and untested live.
+  - GeoBrot introduces **no** forms, inventory UI, or custom item behavior, so there is no
+    Bedrock-form/inventory rendering obligation beyond the above.
+
+  **Explicitly deferred to Milestone 3** (NOT done here, by design): the final vertical terrain model
+  (floor Y135 / surface Y165 / escape-time relief), the geode material palette + config presets
+  wiring, and the `ConfigValidator` `materials.palette` key fix (the benign "Material palette not
+  found" WARN still logs). Minor items also deferred: dead `plugin` field in `MandelCommand`,
+  a duplicated test constant, and the `ConfigValidator` `permissions.admin` default that still names
+  the now-removed `geobrot.admin` (fold into the M3 config cleanup).
+
+  **Still outstanding (not M2 scope):** no `.github/workflows/` CI workflow is installed yet (§8a,
+  scaffold item) — release (gate 9) stays withheld until Milestone 3, so this blocks nothing now.
+  Next step: **Milestone 3** (terrain tune) via the same skill pair.
