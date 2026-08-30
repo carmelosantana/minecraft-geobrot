@@ -29,10 +29,12 @@ public class FractalWorldManager {
     private final Map<String, double[]> worldParameters;
     private final File worldsFile;
     private FileConfiguration worldsConfig;
-    
+    private final TerrainProfile terrainProfile;
+    private final GeodePalette geodePalette;
+
     /**
      * Create a new fractal world manager
-     * 
+     *
      * @param plugin Plugin instance
      */
     public FractalWorldManager(GeoBrotPlugin plugin) {
@@ -40,7 +42,9 @@ public class FractalWorldManager {
         this.fractalWorlds = new HashMap<>();
         this.worldParameters = new HashMap<>();
         this.worldsFile = new File(plugin.getDataFolder(), "fractal_worlds.yml");
-        
+        this.terrainProfile = TerrainProfile.fromConfig(plugin.getConfig());
+        this.geodePalette = GeodePalette.fromConfig(plugin.getConfig());
+
         loadWorldsConfig();
         loadExistingWorlds();
     }
@@ -64,7 +68,7 @@ public class FractalWorldManager {
         double zoom = params[2];
         
         // Create the world
-        MandelbrotGenerator generator = new MandelbrotGenerator(centerX, centerY, zoom, 512);
+        MandelbrotGenerator generator = new MandelbrotGenerator(centerX, centerY, zoom, terrainProfile, geodePalette);
         WorldCreator creator = new WorldCreator(name);
         
         // Configure world settings for proper generation
@@ -129,7 +133,7 @@ public class FractalWorldManager {
     public MandelbrotGenerator getWorldGenerator(String worldName) {
         double[] params = worldParameters.get(worldName);
         if (params != null) {
-            return new MandelbrotGenerator(params[0], params[1], params[2], 512);
+            return new MandelbrotGenerator(params[0], params[1], params[2], terrainProfile, geodePalette);
         }
         return null;
     }
@@ -198,7 +202,7 @@ public class FractalWorldManager {
             // Recreate the world
             double[] params = worldParameters.get(name);
             if (params != null) {
-                MandelbrotGenerator generator = new MandelbrotGenerator(params[0], params[1], params[2], 512);
+                MandelbrotGenerator generator = new MandelbrotGenerator(params[0], params[1], params[2], terrainProfile, geodePalette);
                 WorldCreator creator = new WorldCreator(name);
                 creator.generator(generator);
                 creator.environment(World.Environment.NORMAL);
