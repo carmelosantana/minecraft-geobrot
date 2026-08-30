@@ -12,7 +12,7 @@ services:
       - "19132:19132/udp"
     volumes:
       - minecraft_data:/minecraft
-      - ./target/geobrot-0.1.1.jar:/minecraft/plugins/geobrot.jar
+      - ./target/geobrot-0.2.0.jar:/minecraft/plugins/geobrot.jar
     stdin_open: true # docker run -i
     tty: true # docker run -t
     entrypoint: ["/bin/bash", "/scripts/start.sh"]
