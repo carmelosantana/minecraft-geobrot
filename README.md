@@ -2,10 +2,10 @@
 
 > Generate and explore floating island worlds shaped like the Mandelbrot and Buddhabrot fractals. Create stunning 2D mathematical landscapes that resemble geodes, with built-in world creation, teleportation, and visualization.
 
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.6-green.svg)](https://minecraft.net/)
-[![Paper](https://img.shields.io/badge/Paper-1.21.6-blue.svg)](https://papermc.io/)
-[![License](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
+[![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://www.oracle.com/java/)
+[![Minecraft](https://img.shields.io/badge/Minecraft-26.1-green.svg)](https://minecraft.net/)
+[![Paper](https://img.shields.io/badge/Paper-26.1-blue.svg)](https://papermc.io/)
+[![License](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 ## ✨ Features
 
@@ -201,7 +201,6 @@ Server will be available at:
 | `geobrot.teleport` | Teleport to fractal worlds | `true` |
 | `geobrot.list` | List fractal worlds | `true` |
 | `geobrot.regenerate` | Regenerate fractal worlds | `op` |
-| `geobrot.admin` | Administrative commands | `op` |
 
 ## 🔬 Technical Details
 
@@ -312,20 +311,19 @@ make docker-test
 
 ## 📄 License
 
-Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+Licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). See the [LICENSE](./LICENSE) file for the full text.
 
 ## 👥 Credits
 
 - **Author**: Carmelo Santana
-- **Website**: https://hv2.world
-- **Live Server**: play.hv2.world
+- **Website**: https://xpfarm.org
+- **Live Server**: play.xpfarm.org
 - **Docker Container**: [Legendary Minecraft Geyser](https://github.com/TheRemote/Legendary-Java-Minecraft-Geyser-Floodgate)
 
 ## 🔗 Links
 
 - [GitHub Repository](https://github.com/carmelosantana/geobrot)
-- [Documentation](https://hv2.world/docs/geobrot)
-- [Live Test Server](https://play.hv2.world)
+- [Live Test Server](https://play.xpfarm.org)
 - [Bug Reports](https://github.com/carmelosantana/geobrot/issues)
 
 ---
