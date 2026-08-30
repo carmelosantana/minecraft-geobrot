@@ -15,16 +15,16 @@ This file provides guidelines for contributing to our GeoBrot Plugin development
 
 ## Environment
 
-- Java 21
-- Minecraft Java Edition 1.21+
-- Paper 1.21.6+ (recommended)
+- Java 25
+- Minecraft Java Edition 26.1+
+- Paper 26.1.2+ (recommended)
 - ViaVersion plugin (for Geyser compatibility)
 
 ### Version Compatibility
 
-- **Geyser/Floodgate**: Requires Minecraft 1.21.5+ or ViaVersion for compatibility
+- **Geyser/Floodgate**: Requires Minecraft 26.1+ or ViaVersion for compatibility
 - **ViaVersion**: Automatically downloaded and installed for better cross-version support
-- **Paper**: Latest 1.21.6 builds recommended for optimal performance
+- **Paper**: Latest 26.1.2 builds recommended for optimal performance
 
 ## Testing
 
@@ -37,7 +37,7 @@ This file provides guidelines for contributing to our GeoBrot Plugin development
 
 - Always provide a `Makefile` for easy build commands.
 - Always create a JAR file in the `target/` directory after running `mvn clean package`.
-- Ensure the plugin is compatible with Minecraft Java Edition 1.21+.
+- Ensure the plugin is compatible with Minecraft Java Edition 26.1+.
 - Use `NamespacedKey` for custom recipes to avoid conflicts.
 - Use cached `ItemStack` instances for performance.
 - Use event driven architecture to minimize performance overhead.
@@ -97,7 +97,7 @@ services:
       BedrockPort: "19132"
       TZ: "America/New_York"
       MaxMemory: 4096
-      Version: "1.21.6" # Force latest Paper version
+      Version: "26.1.2" # Force latest Paper version
       NoBackup: "plugins" # Optional folder to skip during backups
       NoPermCheck: "Y" # Optional flag to skip permissions check
       # NoViaVersion: "Y" # Enable ViaVersion for Geyser compatibility
@@ -205,7 +205,7 @@ Every plugin supports these standard Make targets;
 
 ### Java Coding Standards
 
-- **Java Version**: Target Java 21+ features
+- **Java Version**: Target Java 25+ features
 - **Code Style**: ~~Follow standard Java conventions~~ Mostly output from Claude and ChatGPT
 - **Indentation**: 4 spaces (no tabs)
 - **Line Length**: ~Maximum 120 characters

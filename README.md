@@ -34,8 +34,8 @@
 
 ### Requirements
 
-- **Java**: 21 or higher
-- **Server**: Paper 1.21.6+, Spigot 1.21+, or Bukkit 1.21+
+- **Java**: 25 or higher
+- **Server**: Paper 26.1.2+, Spigot 26.1+, or Bukkit 26.1+
 - **Maven**: For building from source
 
 ### Quick Install
@@ -235,8 +235,8 @@ if (escapeTime > threshold) {
 ### Common Issues
 
 **Plugin not loading:**
-- Check Java version (requires 21+)
-- Verify Paper/Spigot version (1.21+)
+- Check Java version (requires 25+)
+- Verify Paper/Spigot version (26.1+)
 - Check server logs for errors
 
 **World generation failing:**

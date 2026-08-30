@@ -21,7 +21,7 @@ services:
       BedrockPort: "19132"
       TZ: "America/New_York"
       MaxMemory: 4096
-      Version: "1.21.6" # Force latest Paper version
+      Version: "26.1.2" # Force latest Paper version
       NoBackup: "plugins" # Optional folder to skip during backups
       NoPermCheck: "Y" # Optional flag to skip permissions check
       # NoViaVersion: "Y" # Enable ViaVersion for Geyser compatibility
