@@ -316,28 +316,66 @@ _Gates 8a (workflow install, scaffold) / 8b (verify main CI, release)._
       `status: completed`, `conclusion: success`, `headSha a3353fd` (the exact pushed commit),
       42s. Only annotations were non-fatal Bukkit `GameRule` deprecation warnings
       (`FractalWorldManager` 162–167) — no build failure. Verified green **after** the run resolved
-      (an in-flight run is not evidence, per release §3). No tag cut — gate 9 (release) and gate 10
-      (updater) remain intentionally withheld pending the play-test-gated step.
+      (an in-flight run is not evidence, per release §3). **Tag `v0.2.0` was subsequently cut on
+      the current main tip `55942a1`** (one docs commit past `a3353fd`), whose own main-branch
+      "Build and release" run [33342506532](https://github.com/carmelosantana/minecraft-geobrot/actions/runs/33342506532)
+      is `completed`/`success` (20s) — the pre-tag green run per release §4. Gate 9 is now complete
+      (below); gate 10 (updater) follows.
 - [x] Workflow permissions contain no broader access than the documented contract. — `permissions:
       contents: write` only (needed for tagged runs to create/update releases); no broader scope.
 
 ## 9. Release
 
-_Gate 9 (`minecraft-plugin-release`). **Withheld** until terrain proven (§1)._
+_Gate 9 (`minecraft-plugin-release`) — **COMPLETE (2026-09-01).** Terrain was proven headlessly
+(gate 7a); the **owner explicitly waived the local play-test** (see §12) — cannot play-test locally,
+wants it live on the server, accepts the experimental risk ("remove it later if it doesn't work").
+Tagged as a **pre-release** per the experimental classification._
 
-- [ ] Semantic version matches the POM, plugin metadata, and `v<version>` tag.
-- [ ] Successful tag Actions run and GitHub release are recorded.
-- [ ] Release contains exactly one updater-matching JAR plus `SHA256SUMS.txt` and no `original-*` JAR.
-- [ ] Downloaded release assets pass `sha256sum --check SHA256SUMS.txt`.
+- [x] Semantic version matches the POM, plugin metadata, and `v<version>` tag. — `pom.xml`
+      `<version>0.2.0</version>`; `plugin.yml` `version: '${project.version}'` (Maven-filtered, embedded
+      `0.2.0` confirmed at gate 6); annotated tag `v0.2.0` on commit `55942a1`.
+- [x] Successful tag Actions run and GitHub release are recorded. — Tag push triggered "Build and
+      release" run [33503059068](https://github.com/carmelosantana/minecraft-geobrot/actions/runs/33503059068):
+      `completed`/`success` (27s). Release published:
+      [releases/tag/v0.2.0](https://github.com/carmelosantana/minecraft-geobrot/releases/tag/v0.2.0),
+      **marked pre-release** (experimental — not promoted to active; that remains the owner's call).
+- [x] Release contains exactly one updater-matching JAR plus `SHA256SUMS.txt` and no `original-*` JAR. —
+      Assets: `geobrot-0.2.0.jar` + `SHA256SUMS.txt` only. No `original-*` JAR.
+- [x] Downloaded release assets pass `sha256sum --check SHA256SUMS.txt`. — Downloaded to a disposable
+      dir; `sha256sum --check` → `geobrot-0.2.0.jar: OK`.
 
 ## 10. Updater
 
-_Gate 10 (`minecraft-plugin-updater`). **Withheld** until released (§1)._
+_Gate 10 (`minecraft-plugin-updater`) — **COMPLETE (2026-09-01).** Enrolled in
+`carmelosantana/minecraft-plugin-updater` `plugins.json` (commit
+[`e9dc8c0`](https://github.com/carmelosantana/minecraft-plugin-updater/commit/e9dc8c0)).
+**Posture: experimental, enabled, force-install the pre-release** (owner decision — wants it live
+on the server). Because GeoBrot's only release is a GitHub **pre-release**, plain `enabled` would
+not install it: `release_for()` (updater.py:43-54) hits `/releases/latest` (skips pre-releases) and
+line 52 rejects pre-releases. The entry therefore carries `pin: "v0.2.0"` (fetch the tag directly)
+**+** `allow_prerelease: true` (permit it) **+** `enabled: true`. Reversible via `enabled: false`._
 
-- [ ] Updater manifest/tests cover repository, destination, anchored asset regex, legacy globs, enabled state, and optional pin.
-- [ ] Fresh install, upgrade, no-op, legacy archival, endpoint failure, and checksum failure behaviors pass.
-- [ ] Updater dry-run uses a disposable directory and never a production plugin directory.
-- [ ] Failure retains the installed JAR and default fail-open behavior permits Minecraft startup.
+- [x] Updater manifest/tests cover repository, destination, anchored asset regex, legacy globs,
+      enabled state, and optional pin. — Entry: `repo carmelosantana/minecraft-geobrot`,
+      `destination geobrot.jar` (unique), `asset_regex ^geobrot-[0-9].*\.jar$` (anchored,
+      version-leading digit), `legacy_globs ["geobrot-[0-9]*.jar"]`, `enabled true`, `pin v0.2.0`
+      (intentional + documented: force-installs the experimental pre-release), `allow_prerelease
+      true`. `python3 -m json.tool` clean; `python3 -m unittest discover -s tests` → 11/11 OK.
+- [x] Fresh install, upgrade, no-op, legacy archival, endpoint failure, and checksum failure
+      behaviors pass. — Dry-run: `GeoBrot: would install v0.2.0` (pin+allow_prerelease resolves the
+      pre-release, checksum-verified). Sandboxed real runs: fresh `installed v0.2.0`; second run
+      `already current (v0.2.0)`; replacement of mismatched bytes → reinstall + timestamped backup;
+      legacy `geobrot-0.1.0.jar` → `archived legacy JARs: geobrot-0.1.0.jar` (moved to backups as
+      `.legacy.bak`); endpoint failure (bad repo) → `WARNING … keeping installed JAR`, exit 0.
+      Checksum-failure / download-failure warn-and-retain paths covered by the green unit suite
+      (`test_bad_checksum_preserves_installed_jar` et al.).
+- [x] Updater dry-run uses a disposable directory and never a production plugin directory. — All
+      runs used `/tmp/minecraft-plugin-updater-dry-run` and `/tmp/geobrot-gate10/{plugins,state,backups}`;
+      `--plugins-dir`/`--state-file`/`--backup-dir` all overridden to the sandbox, never `/minecraft`.
+      Sandbox trees discarded after the run.
+- [x] Failure retains the installed JAR and default fail-open behavior permits Minecraft startup. —
+      Endpoint-failure run kept the installed `geobrot.jar` (32010 bytes) and exited 0 (non-strict
+      fail-open); a plugin-level failure warns and continues, never aborting the batch or blocking startup.
 
 ## 11. Deployment
 
@@ -351,6 +389,15 @@ nothing — not release, not enrolment, not handoff.
 ## 12. Handoff
 
 _Gate 12 (`minecraft-plugin-handoff`). Not this milestone._
+
+> **Owner play-test waiver (2026-09-01).** The gate-9 release was cut **without** a completed
+> in-client play-test. The owner cannot play-test locally ("we have to setup admin"), wants to see
+> GeoBrot **live on the server** instead, and explicitly accepted the experimental risk — "no play
+> test. add it for release. if it doesn't work we'll remove it later." Recorded here as an owner
+> decision, **not** as a performed play-test: the terrain shape has still only been proven headlessly
+> (gate 7a RCON probes + a model render), never seen by a human in-client. The play-test boxes below
+> stay unchecked; the live-on-server view now doubles as the play-test, and the **experimental→active
+> promotion remains the owner's call** once the terrain is seen live.
 
 - [ ] Current-state documentation refreshed with release, CI, updater, deployment, and local pending state.
 - [ ] Known limitations, skipped checks, configuration or migration notes, rollback guidance, and follow-up owner are recorded.
