@@ -338,6 +338,15 @@ _Gates 8a (workflow install, scaffold) / 8b (verify main CI, release)._
 
 ## 9. Release
 
+> **⚠️ Superseded 2026-09-01 (owner direction "release them both like normal, don't pin, just get
+> them online"):** the `v0.2.0` GitHub release was **flipped from pre-release → normal** (`gh release
+> edit v0.2.0 --prerelease=false --latest`), and the updater entry was **normalized to a plain,
+> unpinned entry** (dropped `pin`/`allow_prerelease`/explicit `enabled`) in
+> `minecraft-plugin-updater@36c6c33` — identical shape to every other active plugin. Dry-run now
+> resolves `GeoBrot: would install v0.2.0` via plain `/latest`, no pin. The pre-release/pin rationale
+> recorded below is **historical**; GeoBrot now installs like any normal release. Status stays
+> `experimental` as a maturity label only.
+
 _Gate 9 (`minecraft-plugin-release`) — **COMPLETE (2026-09-01).** Terrain was proven headlessly
 (gate 7a); the **owner explicitly waived the local play-test** (see §12) — cannot play-test locally,
 wants it live on the server, accepts the experimental risk ("remove it later if it doesn't work").
