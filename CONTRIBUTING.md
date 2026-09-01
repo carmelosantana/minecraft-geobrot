@@ -46,7 +46,7 @@ This file provides guidelines for contributing to our GeoBrot Plugin development
 
 ## Author
 
-- Carmelo Santana `xp@carmelosantana.com`
+- Carmelo Santana ([@carmelosantana](https://github.com/carmelosantana))
 - Plugin or Author URL `xp.farm`
 - Use namespace `org.xpfarm.*` for all plugin classes
 - Do not include author information in the code comments or documentation, only in POM files or metadata where appropriate.
