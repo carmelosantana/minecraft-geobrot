@@ -280,9 +280,21 @@ gate 12, headless stack). Startup logs clean: GeoBrot enabled, world created, **
 centered Mandelbrot as gentle contour) + vertical cross-section (grass/dirt/geode-tiers/bedrock,
 void below Y135).
 
-- [ ] Fresh-volume Legendary stack test covers every updater-managed plugin. — **7b withheld:**
-      GeoBrot is not updater-managed yet; out-of-band, not required for this reactivation.
-- [ ] Each updater-managed plugin's manifest state and fresh-volume behavior are recorded separately. — 7b, withheld.
+- [x] Fresh-volume Legendary stack test covers every updater-managed plugin. — **7b RUN + PASSED
+      (2026-09-01), triggered by GeoBrot's enrollment.** `xpfarm-test-stack matrix up --from-releases`
+      booted a fresh-volume disposable Legendary stack (Paper 26.1.2 protocol 775, `Done (16.537s)`,
+      Java port served a real Minecraft handshake) and installed the whole 24-plugin roster from
+      published release assets. **MATRIX PASSED: 24/24** — all present/enabled together, including
+      GeoBrot. ViaVersion 5.11.0, floodgate 2.2.5, Geyser-Spigot 2.11.2 (UDP 19200) all started.
+      Negative path clean: Umami + Ollama no-op with endpoints unconfigured. Only benign WARN was
+      MagicCarpet's expected WorldGuard-absent degradation (unrelated to GeoBrot). See the
+      "Ecosystem Matrix Run (2026-09-01) — PASSED 24/24" section in the handbook `CURRENT_STATE.md`.
+- [x] Each updater-managed plugin's manifest state and fresh-volume behavior are recorded separately. —
+      GeoBrot's manifest state: `enabled: true`, `pin: v0.2.0`, `allow_prerelease: true`. Fresh-volume
+      behavior observed: updater reported `GeoBrot: installed v0.2.0` (the pinned pre-release resolved
+      + checksum-verified), then Paper logged `Loading server plugin GeoBrot v0.2.0` → `Enabling GeoBrot
+      v0.2.0` → `GeoBrot Plugin v0.2.0 enabled!` → `Ready to generate fractal worlds!` with **no**
+      exception. RCON `plugins` header listed `GeoBrot (0.2.0)` among the enabled set.
 - [x] Paper, Geyser, Floodgate, and ViaVersion start successfully together. — 7a: RCON `plugins`
       showed `GeoBrot`, `Geyser-Spigot`, `floodgate`, `ViaVersion` all green together; Java port
       served a real Minecraft handshake (Paper 26.1.2, protocol 775).
