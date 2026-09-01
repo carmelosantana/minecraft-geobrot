@@ -350,7 +350,9 @@ _Gates 8a (workflow install, scaffold) / 8b (verify main CI, release)._
 _Gate 9 (`minecraft-plugin-release`) — **COMPLETE (2026-09-01).** Terrain was proven headlessly
 (gate 7a); the **owner explicitly waived the local play-test** (see §12) — cannot play-test locally,
 wants it live on the server, accepts the experimental risk ("remove it later if it doesn't work").
-Tagged as a **pre-release** per the experimental classification._
+Tagged `v0.2.0`; first published as a pre-release under the experimental classification, then
+**flipped to a normal release the same day** (owner direction — see the Superseded note above), so it
+now follows the standard release posture._
 
 - [x] Semantic version matches the POM, plugin metadata, and `v<version>` tag. — `pom.xml`
       `<version>0.2.0</version>`; `plugin.yml` `version: '${project.version}'` (Maven-filtered, embedded
@@ -359,7 +361,8 @@ Tagged as a **pre-release** per the experimental classification._
       release" run [33503059068](https://github.com/carmelosantana/minecraft-geobrot/actions/runs/33503059068):
       `completed`/`success` (27s). Release published:
       [releases/tag/v0.2.0](https://github.com/carmelosantana/minecraft-geobrot/releases/tag/v0.2.0),
-      **marked pre-release** (experimental — not promoted to active; that remains the owner's call).
+      **now a normal release** (first published pre-release, flipped to normal 2026-09-01 per the
+      Superseded note; `Status: experimental` retained as a maturity label only).
 - [x] Release contains exactly one updater-matching JAR plus `SHA256SUMS.txt` and no `original-*` JAR. —
       Assets: `geobrot-0.2.0.jar` + `SHA256SUMS.txt` only. No `original-*` JAR.
 - [x] Downloaded release assets pass `sha256sum --check SHA256SUMS.txt`. — Downloaded to a disposable
@@ -370,21 +373,23 @@ Tagged as a **pre-release** per the experimental classification._
 _Gate 10 (`minecraft-plugin-updater`) — **COMPLETE (2026-09-01).** Enrolled in
 `carmelosantana/minecraft-plugin-updater` `plugins.json` (commit
 [`e9dc8c0`](https://github.com/carmelosantana/minecraft-plugin-updater/commit/e9dc8c0)).
-**Posture: experimental, enabled, force-install the pre-release** (owner decision — wants it live
-on the server). Because GeoBrot's only release is a GitHub **pre-release**, plain `enabled` would
-not install it: `release_for()` (updater.py:43-54) hits `/releases/latest` (skips pre-releases) and
-line 52 rejects pre-releases. The entry therefore carries `pin: "v0.2.0"` (fetch the tag directly)
-**+** `allow_prerelease: true` (permit it) **+** `enabled: true`. Reversible via `enabled: false`._
+**Final posture: a plain, unpinned entry following `/releases/latest`** — identical in shape to every
+other active plugin (commit [`36c6c33`](https://github.com/carmelosantana/minecraft-plugin-updater/commit/36c6c33)).
+It was first enrolled the same day as a force-install of the pre-release (commit `e9dc8c0`:
+`pin: "v0.2.0"` + `allow_prerelease: true` + `enabled: true`, needed because `release_for()` in
+`updater.py:43-54` skips pre-releases), then **normalized once the release was flipped to normal** —
+the pin, `allow_prerelease`, and explicit `enabled` were dropped. `Status: experimental` is a maturity
+label only; delivery is standard._
 
 - [x] Updater manifest/tests cover repository, destination, anchored asset regex, legacy globs,
-      enabled state, and optional pin. — Entry: `repo carmelosantana/minecraft-geobrot`,
+      and enabled state. — Final entry: `repo carmelosantana/minecraft-geobrot`,
       `destination geobrot.jar` (unique), `asset_regex ^geobrot-[0-9].*\.jar$` (anchored,
-      version-leading digit), `legacy_globs ["geobrot-[0-9]*.jar"]`, `enabled true`, `pin v0.2.0`
-      (intentional + documented: force-installs the experimental pre-release), `allow_prerelease
-      true`. `python3 -m json.tool` clean; `python3 -m unittest discover -s tests` → 11/11 OK.
+      version-leading digit), `legacy_globs ["geobrot-[0-9]*.jar"]` — a plain unpinned entry (the
+      initial `pin v0.2.0` + `allow_prerelease true` were dropped in `36c6c33`). `python3 -m json.tool`
+      clean; `python3 -m unittest discover -s tests` → 11/11 OK.
 - [x] Fresh install, upgrade, no-op, legacy archival, endpoint failure, and checksum failure
-      behaviors pass. — Dry-run: `GeoBrot: would install v0.2.0` (pin+allow_prerelease resolves the
-      pre-release, checksum-verified). Sandboxed real runs: fresh `installed v0.2.0`; second run
+      behaviors pass. — Dry-run: `GeoBrot: would install v0.2.0` (resolved via plain `/releases/latest`
+      after normalization; checksum-verified). Sandboxed real runs: fresh `installed v0.2.0`; second run
       `already current (v0.2.0)`; replacement of mismatched bytes → reinstall + timestamped backup;
       legacy `geobrot-0.1.0.jar` → `archived legacy JARs: geobrot-0.1.0.jar` (moved to backups as
       `.legacy.bak`); endpoint failure (bad repo) → `WARNING … keeping installed JAR`, exit 0.
